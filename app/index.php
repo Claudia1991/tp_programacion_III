@@ -30,7 +30,7 @@ $app->addErrorMiddleware(true, true, true);
 // Routes
 
 $app->get('[/]', function (Request $request, Response $response) {    
-    $response->getBody()->write("Slim Framework 4 PHP");
+    $response->getBody()->write("Desarrollado por Claudia Jara");
     return $response;
 
 });
