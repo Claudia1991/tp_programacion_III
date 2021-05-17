@@ -8,13 +8,17 @@ class UsuarioController extends Usuario implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $usuario = $parametros['usuario'];
+        $nombre = $parametros['nombre'];
+        $apellido = $parametros['apellido'];
         $clave = $parametros['clave'];
+        $codigo_usuario = $parametros['codigo_usuario'];
 
         // Creamos el usuario
         $usr = new Usuario();
-        $usr->usuario = $usuario;
+        $usr->nombre = $nombre;
+        $usr->apellido = $apellido;
         $usr->clave = $clave;
+        $usr->codigo_usuario = $codigo_usuario;
         $usr->crearUsuario();
 
         $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
@@ -27,8 +31,8 @@ class UsuarioController extends Usuario implements IApiUsable
     public function TraerUno($request, $response, $args)
     {
         // Buscamos usuario por nombre
-        $usr = $args['usuario'];
-        $usuario = Usuario::obtenerUsuario($usr);
+        $id_usuario = $args['id'];
+        $usuario = Usuario::obtenerUsuario($id_usuario);
         $payload = json_encode($usuario);
 
         $response->getBody()->write($payload);
@@ -49,9 +53,18 @@ class UsuarioController extends Usuario implements IApiUsable
     public function ModificarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
-
         $nombre = $parametros['nombre'];
-        Usuario::modificarUsuario($nombre);
+        $apellido = $parametros['apellido'];
+        $clave = $parametros['clave'];
+        $codigo_usuario = $parametros['codigo_usuario'];
+        $id = $parametros['id'];
+        $usr = new Usuario();
+        $usr->id = $id;
+        $usr->nombre = $nombre;
+        $usr->apellido = $apellido;
+        $usr->clave = $clave;
+        $usr->codigo_usuario = $codigo_usuario;
+        Usuario::modificarUsuario($usr);
 
         $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
 
@@ -64,7 +77,7 @@ class UsuarioController extends Usuario implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $usuarioId = $parametros['usuarioId'];
+        $usuarioId = $parametros['id'];
         Usuario::borrarUsuario($usuarioId);
 
         $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
