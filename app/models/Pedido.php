@@ -6,7 +6,7 @@ class Pedido
     public $id_estado;
     public $id_producto;
     public $id_sector;
-    public $obsercacion;
+    public $observacion;
     public $fecha_hora;
     public $codigo_cliente;
     public $cantidad;

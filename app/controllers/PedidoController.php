@@ -10,7 +10,7 @@ class PedidoController extends Pedido implements IApiUsable
 
         $id_producto = $parametros['id_producto'];
         $id_sector = $parametros['id_sector'];
-        $obsercacion = $parametros['obsercacion'];
+        $observacion = $parametros['observacion'];
         $codigo_cliente = $parametros['codigo_cliente'];
         $cantidad = $parametros['cantidad'];
 
@@ -18,7 +18,7 @@ class PedidoController extends Pedido implements IApiUsable
         $pedido = new Pedido();
         $pedido->id_producto = $id_producto;
         $pedido->id_sector = $id_sector;
-        $pedido->obsercacion = $obsercacion;
+        $pedido->observacion = $observacion;
         $pedido->codigo_cliente = $codigo_cliente;
         $pedido->cantidad = $cantidad;
         $pedido->crearPedido();
