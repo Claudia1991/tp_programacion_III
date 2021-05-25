@@ -41,10 +41,12 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 // Routes
 $app->group('/autenticacion', function (RouteCollectorProxy $group) {
-    $group->post('/login', \UsuarioController::class . ':Login'); //Por todos los usuarios. 
+    //Accesible para todos los usuarios.
+    $group->post('/login', \UsuarioController::class . ':Login'); 
 });
 
-$app->group('/usuarios', function (RouteCollectorProxy $group) { //Solo por los Socios.
+$app->group('/usuarios', function (RouteCollectorProxy $group) { 
+    //Accesible solo por los Socios.
     $group->get('[/]', \UsuarioController::class . ':TraerTodos');
     $group->get('/{id}', \UsuarioController::class . ':TraerUno');
     $group->post('[/]', \UsuarioController::class . ':CargarUno');
@@ -54,13 +56,14 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) { //Solo por los 
 })->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
-// $app->group('/productos', function (RouteCollectorProxy $group) {
-//     $group->get('[/]', \ProductoController::class . ':TraerTodos');//por todos los usuarios
-//     $group->get('/{id}', \ProductoController::class . ':TraerUno');
-//     $group->post('[/]', \ProductoController::class . ':CargarUno');
-//     $group->put('[/]', \ProductoController::class . ':ModificarUno');
-//     $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
-// });
+$app->group('/productos', function (RouteCollectorProxy $group) {
+    //Accesible para todos los usuarios.
+    $group->get('[/]', \ProductoController::class . ':TraerTodos');
+    $group->get('/{id}', \ProductoController::class . ':TraerUno');
+    $group->post('[/]', \ProductoController::class . ':CargarUno');
+    $group->put('[/]', \ProductoController::class . ':ModificarUno');
+    $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
+});
 
 // $app->group('/pedidos', function (RouteCollectorProxy $group) {
 //     $group->get('[/]', \PedidoController::class . ':TraerTodos');
