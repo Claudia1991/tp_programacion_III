@@ -33,10 +33,9 @@ class PedidoController extends Pedido implements IApiUsable
     public function TraerUno($request, $response, $args)
     {
         // Buscamos producto por id
-        //TODO: MODIFICAR
-        $id_producto = $args['id'];
-        $producto = Producto::obtenerProducto($id_producto);
-        $payload = json_encode($producto);
+        $id_pedido = $args['id'];
+        $pedido = Pedido::obtenerSegunId($id_pedido);
+        $payload = json_encode($pedido);
 
         $response->getBody()->write($payload);
         return $response
@@ -52,23 +51,27 @@ class PedidoController extends Pedido implements IApiUsable
         return $response
           ->withHeader('Content-Type', 'application/json');
     }
+
+    public function TraerTodosSegunSector($request, $response, $args)
+    {
+        $id_sector = $args['id_sector'];
+        $lista = Pedido::obtenerSegunSector($id_sector);
+        $payload = json_encode(array("listaPedidos" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
     
     public function ModificarUno($request, $response, $args)
     {
-      //TODO: MODIFICAR
         $parametros = $request->getParsedBody();
         $id = $parametros['id'];
-        $nombre = $parametros['nombre'];
-        $precio = $parametros['precio'];
-        $tipo = $parametros['tipo'];
-        $producto = new Producto();
-        $producto->id = $id;
-        $producto->nombre = $nombre;
-        $producto->tipo = $tipo;
-        $producto->precio = $precio;
-        Producto::modificarProducto($producto);
+        $estado = $parametros['estado'];
 
-        $payload = json_encode(array("mensaje" => "Producto modificado con exito"));
+        Pedido::modificarEstadoPedido($id, $estado);
+
+        $payload = json_encode(array("mensaje" => "Estado pedido modificado con exito"));
 
         $response->getBody()->write($payload);
         return $response
@@ -77,13 +80,11 @@ class PedidoController extends Pedido implements IApiUsable
 
     public function BorrarUno($request, $response, $args)
     {
-      //TODO : MODIFICAR
         $parametros = $request->getParsedBody();
+        $id_pedido = $parametros['id'];
+        Pedido::borrarPedido($id_pedido);
 
-        $productoId = $parametros['id'];
-        Producto::borrarProducto($productoId);
-
-        $payload = json_encode(array("mensaje" => "Producto borrado con exito"));
+        $payload = json_encode(array("mensaje" => "Pedido borrado con exito"));
 
         $response->getBody()->write($payload);
         return $response

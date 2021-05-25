@@ -1,8 +1,8 @@
 <?php
-require_once './models/Mesa.php';
+require_once './models/Encuesta.php';
 require_once './interfaces/IApiUsable.php';
 
-class MesaController extends Mesa implements IApiUsable
+class EncuestaController extends Encuesta implements IApiUsable
 {
     public function CargarUno($request, $response, $args)
     {
@@ -24,10 +24,10 @@ class MesaController extends Mesa implements IApiUsable
 
     public function TraerUno($request, $response, $args)
     {
-        // Buscamos mesa por codigo_cliente
-        $id_mesa = $args['codigo_cliente'];
-        $mesa = Mesa::obtenerMesaSegunCodigoCliente($id_mesa);
-        $payload = json_encode($mesa);
+        // Buscamos encuesta por codigo_cliente
+        $id = $args['id'];
+        $encuesta = Encuesta::obtenerUno($id);
+        $payload = json_encode($encuesta);
 
         $response->getBody()->write($payload);
         return $response
@@ -36,8 +36,8 @@ class MesaController extends Mesa implements IApiUsable
 
     public function TraerTodos($request, $response, $args)
     {
-        $lista = Mesa::obtenerTodos();
-        $payload = json_encode(array("listaMesas" => $lista));
+        $lista = Encuesta::obtenerTodos();
+        $payload = json_encode(array("listaEncuesta" => $lista));
 
         $response->getBody()->write($payload);
         return $response
@@ -48,27 +48,25 @@ class MesaController extends Mesa implements IApiUsable
     {
         $parametros = $request->getParsedBody();
         $id = $parametros['id'];
-        $codigo_mesa_estado = $parametros['codigo_mesa_estado'];
-        $mesa = new Mesa();
-        $mesa->id = $id;
-        $mesa->codigo_mesa_estado = $codigo_mesa_estado;
-        Mesa::modificarMesa($id, $codigo_mesa_estado);
+        $puntuacion_descripcion = $parametros['puntuacion_descripcion'];
+        $puntuacion_numero = $parametros['puntuacion_numero'];
+
+        Encuesta::modificarEncuesta($id, $puntuacion_descripcion, $puntuacion_numero);
 
         $payload = json_encode(array("mensaje" => "Mesa modificado con exito"));
 
         $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
 
-        $id_mesa = $parametros['id'];
-        Mesa::borrarMesa($id_mesa);
+        $id_encuesta = $parametros['id'];
+        Encuesta::borrarEncuesta($id_encuesta);
 
-        $payload = json_encode(array("mensaje" => "Mesa borrado con exito"));
+        $payload = json_encode(array("mensaje" => "Encuesta borrada con éxito"));
 
         $response->getBody()->write($payload);
         return $response
