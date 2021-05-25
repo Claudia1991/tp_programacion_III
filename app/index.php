@@ -12,8 +12,7 @@ use Slim\Routing\RouteContext;
 require __DIR__ . '/../vendor/autoload.php';
 
 require_once './db/AccesoDatos.php';
-//require_once './middlewares/Logger.php';
-//require_once './middlewares/CorsMiddleware.php';
+require_once './middlewares/LoggerMiddleware.php';
 
 require_once './middlewares/AutenticacionMiddelware.php';
 require_once './middlewares/UsuariosMiddleware.php';
@@ -53,17 +52,20 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->put('[/]', \UsuarioController::class . ':ModificarUno');
     $group->put('/{id}', \UsuarioController::class . ':ActivarTemporada');
     $group->delete('/{id}', \UsuarioController::class . ':BorrarUno');
-})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+})->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
-    //Accesible para todos los usuarios.
+    //Accesible solo por los Socios.
     $group->get('[/]', \ProductoController::class . ':TraerTodos');
     $group->get('/{id}', \ProductoController::class . ':TraerUno');
     $group->post('[/]', \ProductoController::class . ':CargarUno');
     $group->put('[/]', \ProductoController::class . ':ModificarUno');
     $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
-});
+})->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 // $app->group('/pedidos', function (RouteCollectorProxy $group) {
 //     $group->get('[/]', \PedidoController::class . ':TraerTodos');
