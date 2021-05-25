@@ -26,11 +26,11 @@ class UsuariosMiddleware{
                 $response = $handler->handle($request);
             }else{
                 $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
-                $response->withStatus(401);
+                $response = $response->withStatus(401);
             }
         }else{
             $response->getBody()->write(json_encode(array("error" => "Error en los datos ingresados en el dataToken")));
-            $response->withStatus(400);
+            $response = $response->withStatus(400);
         }
      return $response->withHeader('Content-Type', 'application/json');
     }

@@ -36,7 +36,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $codigo_usuario = $parametros['codigo_usuario'];
         if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($codigo_usuario)){
           $payload = json_encode(array("error" => "Error en los parametros ingresados para crear el usuario."));
-          $response->withStatus(400);
+          $response = $response->withStatus(400);
         }else{
           // Creamos el usuario
           $usr = new Usuario();
@@ -47,7 +47,7 @@ class UsuarioController extends Usuario implements IApiUsable
           $id_generado = $usr->crearUsuario();
           
           $payload = json_encode(array("mensaje" => "Usuario creado con exito, id generado: " . $id_generado));
-          $response->withStatus(200);
+          $response = $response->withStatus(200);
         }
 
         $response->getBody()->write($payload);
@@ -60,12 +60,12 @@ class UsuarioController extends Usuario implements IApiUsable
         $id_usuario = $args['id'];
         if(!isset($id_usuario)){
           $payload = json_encode(array("error" => "Error en los parametros ingresados para obtener un usuario."));
-          $response->withStatus(400);
+          $response = $response->withStatus(400);
         }else{
           // Creamos el usuario
           $usuario = Usuario::obtenerUsuario($id_usuario);
           $payload = json_encode(array("usuario" => $usuario));
-          $response->withStatus(200);
+          $response = $response->withStatus(200);
         }
 
         $response->getBody()->write($payload);
@@ -92,13 +92,13 @@ class UsuarioController extends Usuario implements IApiUsable
 
         if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($codigo_usuario) || !isset($activo_temporada) || !isset($id)){
           $payload = json_encode(array("error" => "Error en los parametros para modificar usuario."));
-          $response->withStatus(400);
+          $response = $response->withStatus(400);
         }else{
           //Verificar si existe el usuario ingresado
           $usuarioAModificar = Usuario::obtenerUsuario($id);
           if(!isset($usuarioAModificar)){
             $payload = json_encode(array("error" => "No existe el usuario a modificar"));
-            $response->withStatus(400);
+            $response = $response->withStatus(400);
           }else{
             $usr = new Usuario();
             $usr->id = $id;
@@ -109,7 +109,7 @@ class UsuarioController extends Usuario implements IApiUsable
             $usr->activo_temporada = $activo_temporada;
             Usuario::modificarUsuario($usr);
             $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
-            $response->withStatus(200);
+            $response = $response->withStatus(200);
           }
         }
         $response->getBody()->write($payload);
@@ -122,17 +122,17 @@ class UsuarioController extends Usuario implements IApiUsable
         $usuarioId = $parametros['id'];
         if(!isset($parametros) || !isset($usuarioId)){
           $payload = json_encode(array("error" => "Error en datos para eliminar el usuario."));
-          $response->withStatus(400);
+          $response = $response->withStatus(400);
         }else{
           //Verifico si existe el usuario a eliminar
           $usuarioAEliminar = Usuario::obtenerUsuario($usuarioId);
           if(!isset($usuarioAEliminar)){
             $payload = json_encode(array("error" => "No existe el usuario a eliminar."));
-            $response->withStatus(400);
+            $response = $response->withStatus(400);
           }else{
             Usuario::borrarUsuario($usuarioId);
             $payload = json_encode(array("Mensaje" => "Usuario borrado con exito"));
-            $response->withStatus(200);
+            $response = $response->withStatus(200);
           }
         }
 
@@ -145,17 +145,17 @@ class UsuarioController extends Usuario implements IApiUsable
         $usuarioId = $args['id'];
         if(!isset($usuarioId)){
           $payload = json_encode(array("error" => "Error en datos para activar el usuario por temporada."));
-          $response->withStatus(400);
+          $response = $response->withStatus(400);
         }else{
           //Verifico si existe el usuario a activar
           $usuarioActivar = Usuario::obtenerUsuario($usuarioId);
           if(!$usuarioActivar){
             $payload = json_encode(array("error" => "No existe el usuario a activar."));
-            $response->withStatus(400);
+            $response = $response->withStatus(400);
           }else{
             Usuario::RevertirBajaTemporada($usuarioId);
             $payload = json_encode(array("Mensaje" => "Usuario activado con exito"));
-            $response->withStatus(200);
+            $response = $response->withStatus(200);
           }
         }
         $response->getBody()->write($payload);
