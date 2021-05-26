@@ -15,7 +15,7 @@ class UsuarioController extends Usuario implements IApiUsable
       if(isset($usuario)){
         //Existe el usuario, verificamos el password
         if(password_verify($clave, $usuario->clave)){
-          $datos = json_encode(array("id_usuario" => $usuario->id, "codigo_tipo_usuario" => $usuario->codigo_usuario));
+          $datos = json_encode(array("id_usuario" => $usuario->id, "tipo_usuario" => $usuario->tipo_usuario, "id_sector" => $usuario->id_sector));
           $token = AutentificadorJWT::CrearToken($datos);
           $response->getBody()->write(json_encode(array("token" => $token)));
         }else{
@@ -33,8 +33,9 @@ class UsuarioController extends Usuario implements IApiUsable
         $nombre = $parametros['nombre'];
         $apellido = $parametros['apellido'];
         $clave = $parametros['clave'];
-        $codigo_usuario = $parametros['codigo_usuario'];
-        if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($codigo_usuario)){
+        $tipo_usuario = $parametros['tipo_usuario'];
+        $id_sector = $parametros['id_sector'];
+        if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($tipo_usuario) || !isset($id_sector)){
           $payload = json_encode(array("error" => "Error en los parametros ingresados para crear el usuario."));
           $response = $response->withStatus(400);
         }else{
@@ -43,7 +44,8 @@ class UsuarioController extends Usuario implements IApiUsable
           $usr->nombre = $nombre;
           $usr->apellido = $apellido;
           $usr->clave = $clave;
-          $usr->codigo_usuario = $codigo_usuario;
+          $usr->tipo_usuario = $tipo_usuario;
+          $usr->id_sector = $id_sector;
           $id_generado = $usr->crearUsuario();
           
           $payload = json_encode(array("mensaje" => "Usuario creado con exito, id generado: " . $id_generado));
@@ -86,11 +88,9 @@ class UsuarioController extends Usuario implements IApiUsable
         $nombre = $parametros['nombre'];
         $apellido = $parametros['apellido'];
         $clave = $parametros['clave'];
-        $codigo_usuario = $parametros['codigo_usuario'];
-        $activo_temporada = $parametros['activo_temporada'];
         $id = $parametros['id'];
 
-        if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($codigo_usuario) || !isset($activo_temporada) || !isset($id)){
+        if(!isset($parametros) || !isset($nombre) || !isset($apellido) || !isset($clave) || !isset($id)){
           $payload = json_encode(array("error" => "Error en los parametros para modificar usuario."));
           $response = $response->withStatus(400);
         }else{
@@ -105,8 +105,6 @@ class UsuarioController extends Usuario implements IApiUsable
             $usr->nombre = $nombre;
             $usr->apellido = $apellido;
             $usr->clave = $clave;
-            $usr->codigo_usuario = $codigo_usuario;
-            $usr->activo_temporada = $activo_temporada;
             Usuario::modificarUsuario($usr);
             $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
             $response = $response->withStatus(200);
@@ -153,7 +151,7 @@ class UsuarioController extends Usuario implements IApiUsable
             $payload = json_encode(array("error" => "No existe el usuario a activar."));
             $response = $response->withStatus(400);
           }else{
-            Usuario::RevertirBajaTemporada($usuarioId);
+            Usuario::revertirBajaUsuario($usuarioId);
             $payload = json_encode(array("Mensaje" => "Usuario activado con exito"));
             $response = $response->withStatus(200);
           }

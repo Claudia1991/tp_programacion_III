@@ -1,16 +1,13 @@
 <?php
 
-require_once './models/Validador.php';
-
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
 
 class UsuariosMiddleware{
 
-    private static $id_tipo_socio = 5;
-    private static $id_tipo_mozo = 1;
-
+    private static $id_tipo_socio = 1;
+    private static $id_tipo_empleado = 2;
 
     public function VerificarAccesoSocios(Request $request, RequestHandler $handler): Response{
         /**
@@ -21,7 +18,7 @@ class UsuariosMiddleware{
         $response = new Response();
         if(isset($dataToken)){
             //Verifico que el codigo_tipo_usuario sea socio
-            if($dataToken['codigo_tipo_usuario'] == self::$id_tipo_socio){
+            if($dataToken['tipo_usuario'] == self::$id_tipo_socio){
                 //avanzo al siguiente MW o paso al controller de la apii
                 $response = $handler->handle($request);
             }else{
@@ -35,14 +32,22 @@ class UsuariosMiddleware{
      return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function VerificarAccesoUsuariosPedidos(Request $request, RequestHandler $handler): Response{
+    public function VerificarAccesoMozoCargarPedidos(Request $request, RequestHandler $handler): Response{
         //Pedidos
         /**
          * Cargar Uno => solo por el mozo
-         * TraerTodos => cada sector con su pedido
+         * TraerTodos => cada sector con su pedido y por el socio
          * ModificarUno => cada sector con su pedido
          */
-        $response = new Response();
+         $method = $request->getMethod();
+         $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
+         $codigo_tipo_usuario = $dataToken['codigo_tipo_usuario'];
+         $response = new Response();
+         if($codigo_tipo_usuario == self::$id_tipo_empleado && strcmp($method, 'POST') == 0){
+             //Cargar uno solo por el mozo
+            $response = $handler->handle($request);
+         }
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
@@ -52,6 +57,9 @@ class UsuariosMiddleware{
          * CargarUno => solo por el mozo
          * ModificarUno => Cambia el estado de la mesa mozo o socio.
          */
+
+
+
         $response = new Response();
 
         return $response->withHeader('Content-Type', 'application/json');
