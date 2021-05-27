@@ -35,7 +35,12 @@ class Pedido
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM Pedidos where baja_logica = 0");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo_cliente,ep.codigo as id_estado, ep.descripcion as estado_descripcion, pr.id as id_producto, pr.nombre as producto_descripcion, p.id_sector, sr.descripcion as sector_descripcion, p.fecha_hora, p.cantidad, p.baja_logica FROM Pedidos p
+        INNER JOIN Estados_Pedidos ep on ep.codigo = p.id_estado
+        INNER JOIN Productos pr on pr.id = p.id_producto
+        INNER JOIN Sectores_Restaurant sr on sr.codigo = p.id_sector
+        where p.baja_logica = :baja_logica");
+        $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
@@ -44,8 +49,33 @@ class Pedido
     public static function obtenerSegunId($id_pedido)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM Pedidos where id = :id and baja_logica = 0");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo_cliente,ep.codigo as id_estado, ep.descripcion as estado_descripcion, pr.id as id_producto, pr.nombre as producto_descripcion, p.id_sector, sr.descripcion as sector_descripcion, p.fecha_hora, p.cantidad, p.baja_logica FROM Pedidos p
+        INNER JOIN Estados_Pedidos ep on ep.codigo = p.id_estado
+        INNER JOIN Productos pr on pr.id = p.id_producto
+        INNER JOIN Sectores_Restaurant sr on sr.codigo = p.id_sector
+        where p.id = :id and p.baja_logica = :baja_logica");
+        // $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM Pedidos where id = :id and (:id_sector is null or id_sector = :id_sector) 
+        // and baja_logica = :baja_logica");
         $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
+        $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Pedido');
+    }
+
+    public static function obtenerSegunIdySector($id_pedido, $id_sector)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo_cliente,ep.codigo as id_estado, ep.descripcion as estado_descripcion, pr.id as id_producto, pr.nombre as producto_descripcion, p.id_sector, sr.descripcion as sector_descripcion, p.fecha_hora, p.cantidad, p.baja_logica FROM Pedidos p
+        INNER JOIN Estados_Pedidos ep on ep.codigo = p.id_estado
+        INNER JOIN Productos pr on pr.id = p.id_producto
+        INNER JOIN Sectores_Restaurant sr on sr.codigo = p.id_sector
+        where p.id = :id and p.id_sector = :id_sector and p.baja_logica = :baja_logica");
+        // $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM Pedidos where id = :id and (:id_sector is null or id_sector = :id_sector) 
+        // and baja_logica = :baja_logica");
+        $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
+        $consulta->bindValue(':id_sector', $id_sector, PDO::PARAM_INT);
+        $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchObject('Pedido');
@@ -64,9 +94,15 @@ class Pedido
 
     public static function obtenerSegunSector($sector)
     {
+        var_dump($sector);
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM Pedidos where id_sector = :id_sector and baja_logica = 0");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo_cliente,ep.codigo as id_estado, ep.descripcion as estado_descripcion, pr.id as id_producto, pr.nombre as producto_descripcion, p.id_sector, sr.descripcion as sector_descripcion, p.fecha_hora, p.cantidad, p.baja_logica FROM Pedidos p
+        INNER JOIN Estados_Pedidos ep on ep.codigo = p.id_estado
+        INNER JOIN Productos pr on pr.id = p.id_producto
+        INNER JOIN Sectores_Restaurant sr on sr.codigo = p.id_sector
+        where p.id_sector = :id_sector and p.baja_logica = :baja_logica");
         $consulta->bindValue(':id_sector', $sector, PDO::PARAM_INT);
+        $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
