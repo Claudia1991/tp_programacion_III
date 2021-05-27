@@ -41,11 +41,20 @@ class UsuariosMiddleware{
          */
          $method = $request->getMethod();
          $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
-         $codigo_tipo_usuario = $dataToken['codigo_tipo_usuario'];
+         $tipo_usuario = $dataToken['tipo_usuario'];
+         $id_sector = $dataToken['id_sector'];
          $response = new Response();
-         if($codigo_tipo_usuario == self::$id_tipo_empleado && strcmp($method, 'POST') == 0){
-             //Cargar uno solo por el mozo
-            $response = $handler->handle($request);
+         if(!isset($method) || !isset($dataToken) || !isset($tipo_usuario) || !isset($id_sector)){
+            $response->getBody()->write(json_encode(array("error" => "Error en los datos ingresados en el dataToken")));
+            $response = $response->withStatus(400);
+         }else{
+            if($tipo_usuario == self::$id_tipo_empleado && strcmp($method, 'POST') == 0 && $id_sector == 5){
+                //Cargar uno solo por el mozo, sector 5 => Atencion al cliente
+               $response = $handler->handle($request);
+            }else{
+               $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
+               $response = $response->withStatus(401);
+            }
          }
 
         return $response->withHeader('Content-Type', 'application/json');
