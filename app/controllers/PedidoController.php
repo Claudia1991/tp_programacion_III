@@ -47,8 +47,8 @@ class PedidoController extends Pedido implements IApiUsable
           $response = $response->withStatus(400);
         }else{
           //TO DO: se puede refactor metodo MODIFICAR UNO
-          if($id_sector == 6){
-            //es un socio
+          if($id_sector == 6 || $id_sector == 5){
+            //Es un socio (sector 6) o es un mozo (sector 5) traer todos los pedidos
             $pedido = Pedido::obtenerSegunId($id_pedido);
           }else{
             //Es algun sector(cocina 1 / candy bar 2 / barra tragos 3 / barra cervezas 4)
@@ -75,8 +75,8 @@ class PedidoController extends Pedido implements IApiUsable
           $response = $response->withStatus(400);
         }else{
           $lista = null;
-          if($id_sector == 6){
-            //Es un socio, sector 6 traer todos los pedidos
+          if($id_sector == 6 || $id_sector == 5){
+            //Es un socio (sector 6) o es un mozo (sector 5) traer todos los pedidos
             $lista = Pedido::obtenerTodos();
           }else{
             $lista = Pedido::obtenerSegunSector($id_sector);

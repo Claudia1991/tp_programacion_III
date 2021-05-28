@@ -32,7 +32,7 @@ class UsuariosMiddleware{
      return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function VerificarAccesoMozoCargarPedidos(Request $request, RequestHandler $handler): Response{
+    public function verificarAccesoMozo(Request $request, RequestHandler $handler): Response{
         //Pedidos
         /**
          * Cargar Uno => solo por el mozo
@@ -60,18 +60,59 @@ class UsuariosMiddleware{
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function VerificarAccesoUsuariosMesas(Request $request, RequestHandler $handler): Response{
+    public function VerificarAccesoSectores(Request $request, RequestHandler $handler): Response{
+        /**
+         * Pedidos
+         * ModificarUno => Cambia el estado del pedido, todos los sectores menos el mozo o el socio
+         */
+        $method = $request->getMethod();
+         $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
+         $tipo_usuario = $dataToken['tipo_usuario'];
+         $id_sector = $dataToken['id_sector'];
+         $response = new Response();
+         if(!isset($method) || !isset($dataToken) || !isset($tipo_usuario) || !isset($id_sector)){
+            $response->getBody()->write(json_encode(array("error" => "Error en los datos ingresados en el dataToken")));
+            $response = $response->withStatus(400);
+         }else{
+            if($tipo_usuario == self::$id_tipo_empleado && in_array($id_sector, self::SectoresEmpleados())){
+               $response = $handler->handle($request);
+            }else{
+               $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
+               $response = $response->withStatus(401);
+            }
+         }
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function VerificarAccesoSocioMozo(Request $request, RequestHandler $handler): Response{
         /**
          * Mesas
          * CargarUno => solo por el mozo
          * ModificarUno => Cambia el estado de la mesa mozo o socio.
          */
-
-
-
+        $method = $request->getMethod();
+        $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
+        $tipo_usuario = $dataToken['tipo_usuario'];
+        $id_sector = $dataToken['id_sector'];
         $response = new Response();
+        if(!isset($method) || !isset($dataToken) || !isset($tipo_usuario) || !isset($id_sector)){
+           $response->getBody()->write(json_encode(array("error" => "Error en los datos ingresados en el dataToken")));
+           $response = $response->withStatus(400);
+        }else{
+           if(($tipo_usuario == self::$id_tipo_empleado || $tipo_usuario == self::$id_tipo_socio) 
+           && !in_array($id_sector, self::SectoresEmpleados())){
+              $response = $handler->handle($request);
+           }else{
+              $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
+              $response = $response->withStatus(401);
+           }
+        }
+       return $response->withHeader('Content-Type', 'application/json');
+    }
 
-        return $response->withHeader('Content-Type', 'application/json');
+    private static function SectoresEmpleados(){
+        return [1,2,3,4];
     }
 }
 
