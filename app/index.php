@@ -10,17 +10,15 @@ use Slim\Routing\RouteCollectorProxy;
 use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
-
 require_once './db/AccesoDatos.php';
 require_once './middlewares/LoggerMiddleware.php';
-
 require_once './middlewares/AutenticacionMiddelware.php';
 require_once './middlewares/UsuariosMiddleware.php';
-
 require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
 require_once './controllers/MesaController.php';
+require_once './controllers/EncuestaController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -50,8 +48,8 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('/{id}', \UsuarioController::class . ':TraerUno');
     $group->post('[/]', \UsuarioController::class . ':CargarUno');
     $group->put('[/]', \UsuarioController::class . ':ModificarUno');
-    $group->put('/{id}', \UsuarioController::class . ':ActivarTemporada');
-    $group->delete('/{id}', \UsuarioController::class . ':BorrarUno');
+    $group->put('/activarTemporada', \UsuarioController::class . ':ActivarTemporada');
+    $group->delete('[/]', \UsuarioController::class . ':BorrarUno');
 })->add(\LoggerMiddleware::class . ':LogOperacion')
 ->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
@@ -83,7 +81,25 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
     $group->get('/{codigo_cliente}', \MesaController::class . ':TraerUno')->add(\UsuariosMiddleware::class . ':verificarAccesoSocioMozo'); //Por el mozo y el socio
     $group->post('[/]', \MesaController::class . ':CargarUno')->add(\UsuariosMiddleware::class . ':verificarAccesoMozo'); //solo por el mozo
     $group->put('[/]', \MesaController::class . ':ModificarUno')->add(\UsuariosMiddleware::class . ':verificarAccesoSocioMozo'); //Cambia el estado de la mesa, solo por mesero o socio
+    $group->delete('[/]', \MesaController::class . ':BorrarUno')->add(\UsuariosMiddleware::class . ':verificarAccesoSocios'); 
 })->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
+
+$app->group('/encuestas', function (RouteCollectorProxy $group) {
+    $group->get('[/]', \EncuestaController::class . ':TraerTodos')
+    ->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+    ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario'); 
+    $group->get('/{codigo_cliente}', \EncuestaController::class . ':TraerUno')
+    ->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+    ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
+    $group->post('[/]', \EncuestaController::class . ':CargarUno'); 
+})->add(\LoggerMiddleware::class . ':LogOperacion');
+
+
+$app->group('/reportes', function (RouteCollectorProxy $group) {
+    $group->get('/fecha_inicio={inicio}&fecha_fin={fin}', \ReportesController::class . ':TraerTodos'); 
+})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+->add(\LoggerMiddleware::class . ':LogOperacion')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->get('[/]', function (Request $request, Response $response) {    

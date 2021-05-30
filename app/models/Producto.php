@@ -41,9 +41,7 @@ class Producto
     public static function modificarProducto(Producto $producto)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE Productos SET nombre = :nombre, precio = :precio, tipo = :tipo WHERE id = :id");
-        $consulta->bindValue(':nombre', $producto->nombre, PDO::PARAM_STR);
-        $consulta->bindValue(':tipo', $producto->tipo, PDO::PARAM_STR);
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE Productos SET precio = :precio WHERE id = :id");
         $consulta->bindValue(':precio', $producto->precio, PDO::PARAM_INT);
         $consulta->bindValue(':id', $producto->id, PDO::PARAM_INT);
         $consulta->execute();

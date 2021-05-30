@@ -1,6 +1,7 @@
 <?php
 require_once './models/Pedido.php';
-
+require_once './models/Producto.php';
+require_once './models/Mesa.php';
 require_once './interfaces/IApiUsable.php';
 
 class PedidoController extends Pedido implements IApiUsable
@@ -9,24 +10,35 @@ class PedidoController extends Pedido implements IApiUsable
     {
         $parametros = $request->getParsedBody()["body"];
         $id_producto = $parametros['id_producto'];
-        $id_sector = $parametros['id_sector'];
         $codigo_cliente = $parametros['codigo_cliente'];
         $cantidad = $parametros['cantidad'];
         $payload = null;
-        if(!isset($parametros) || !isset($id_producto) || !isset($id_sector) || !isset($codigo_cliente) || !isset($cantidad)){
+        if(!isset($parametros) || !isset($id_producto) || !isset($codigo_cliente) || !isset($cantidad)){
           $payload = json_encode(array("error" => "Error en los parametros ingresados."));
           $response = $response->withStatus(400);
         }else{
-          //TODO: verificar si existe el producto, y el cliente, y actualizar la consumicion de la mesa
-          //y si el cliente no esta, primero decir que cargue la mesa
-          // Creamos el pedido
-          $pedido = new Pedido();
-          $pedido->id_producto = $id_producto;
-          $pedido->id_sector = $id_sector;
-          $pedido->codigo_cliente = $codigo_cliente;
-          $pedido->cantidad = $cantidad;
-          $id_pedido_creado = $pedido->crearPedido();
-          $payload = json_encode(array("mensaje" => "Pedido creado con exito. Id pedido creado: " . $id_pedido_creado));
+          $producto = Producto::obtenerProducto($id_producto);
+          $mesa = Mesa::obtenerMesaSegunCodigoCliente($codigo_cliente);
+          if(!$producto){
+            $payload = json_encode(array("error" => "No existe el producto que quiere agregar al pedido."));
+            $response = $response->withStatus(400);
+          }elseif(!$mesa){
+            $payload = json_encode(array("error" => "No existe la mesa a la cual cargar el pedido. Primero cargue la mesa."));
+            $response = $response->withStatus(400);
+          }else{
+            $pedido = new Pedido();
+            $pedido->id_mesa = $mesa->id;
+            $pedido->id_producto = $id_producto;
+            $pedido->id_sector = $producto->tipo;
+            $pedido->codigo_cliente = $codigo_cliente;
+            $pedido->cantidad = $cantidad;
+            $pedido->id_empleado = 0;
+            $id_pedido_creado = $pedido->crearPedido();
+            $consumicion = ($producto->precio * $cantidad) + $mesa->total_consumicion;
+            Mesa::actualizarConsumicionMesa($mesa->id, $mesa->codigo_cliente, $consumicion);
+            $payload = json_encode(array("mensaje" => "Pedido creado con exito. Id pedido creado: " . $id_pedido_creado));
+            $response = $response->withStatus(201);
+          }
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -46,7 +58,6 @@ class PedidoController extends Pedido implements IApiUsable
           $payload = json_encode(array("error" => "Error en los parametros para traer un pedido."));
           $response = $response->withStatus(400);
         }else{
-          //TO DO: se puede refactor metodo MODIFICAR UNO
           if($id_sector == 6 || $id_sector == 5){
             //Es un socio (sector 6) o es un mozo (sector 5) traer todos los pedidos
             $pedido = Pedido::obtenerSegunId($id_pedido);
@@ -92,25 +103,36 @@ class PedidoController extends Pedido implements IApiUsable
     {
       //Modificar uno es solo por el sector, no por el mozo sector 5 o socio sector 6
         $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
-        $id_sector = $dataToken['id_sector'];
         $parametros = $request->getParsedBody()["body"];
+        $id_sector = $dataToken['id_sector'];
+        $id_usuario = $dataToken['id_usuario'];
         $id_pedido = $parametros['id'];
         $estado_pedido = $parametros['estado'];
+        $minutos_preparacion = $parametros['minutos_preparacion'];
         $payload = null;
         if(!isset($parametros) || !isset($id_pedido) || !isset($estado_pedido) || !isset($id_sector)){
           $payload = json_encode(array("error" => "Error en los parametros ingresados para modificar el estado de un pedido."));
           $response = $response->withStatus(400);
         }else{
-          //Obtengo el pedido , verifico el sector con el sector del pedido
-          //TO DO: se puede refactor metodo TRAER UNO
-            //Es algun sector(cocina 1 / candy bar 2 / barra tragos 3 / barra cervezas 4)
+          //Es algun sector(cocina 1 / candy bar 2 / barra tragos 3 / barra cervezas 4)
           $pedido = Pedido::obtenerSegunIdySector($id_pedido, $id_sector);
           if(!$pedido){
             $payload = json_encode(array("error" => "No existe el pedido que quiere actualizar o no es de su sector."));
-          $response = $response->withStatus(400);
+            $response = $response->withStatus(400);
           }else{
-            Pedido::modificarEstadoPedido($id_pedido, $estado_pedido);
-            $payload = json_encode(array("mensaje" => "Estado pedido modificado con exito."));
+            /**
+             * Logica de negocio:
+             */
+            if($estado_pedido == 2 && isset($minutos_preparacion) && $pedido->id_estado == 1){
+              Pedido::tomarPedido($id_pedido, $minutos_preparacion, $id_usuario);
+              $payload = json_encode(array("mensaje" => "Pedido tomado con exito."));
+            }elseif($estado_pedido == 3 && $pedido->id_estado == 2 && $pedido->id_empleado == $id_usuario){
+              Pedido::entregarPedido($id_pedido);
+              $payload = json_encode(array("mensaje" => "Pedido terminado con exito."));
+            }else{
+              $payload = json_encode(array("error" => "No se puede modificar el estado del pedido."));
+              $response = $response->withStatus(400);
+            }
           }
         }
         $response->getBody()->write($payload);
@@ -119,14 +141,9 @@ class PedidoController extends Pedido implements IApiUsable
 
     public function BorrarUno($request, $response, $args)
     {
-      //El borrado logico ocurre, cuando se cierra una mesa, ojo al piojo, solo los socios
-        $id_pedido = $args['id'];
-        Pedido::borrarPedido($id_pedido);
-
-        $payload = json_encode(array("mensaje" => "Pedido borrado con exito"));
-
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
+      $payload = json_encode(array("error" => "Metodo no permitido"));
+      $response = $response->withStatus(405);
+      $response->getBody()->write($payload);
+      return $response->withHeader('Content-Type', 'application/json');
     }
 }
