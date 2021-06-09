@@ -13,6 +13,8 @@ class Mesa
     public $fecha_hora_inicio;
     public $fecha_hora_fin;
     public $libre;
+    /**Reportes */
+    public $cantidad_uso;
 
     public function crearMesa($id_mesa, $id_mozo)
     {
@@ -113,6 +115,54 @@ class Mesa
         $consulta->bindValue(':total_consumicion', $total_consumicion, PDO::PARAM_STR);
         $consulta->bindValue(':id_mesa', $id_mesa, PDO::PARAM_INT);
         $consulta->execute();
+    }
+
+    /**
+     * REPORTES
+     */
+
+    public static function usabilidadMesas($fecha_inicio, $fecha_fin){
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("SELECT COUNT(id_mesa) AS cantidad_uso , id_mesa AS id FROM Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
+    }
+
+    public static function facturacionMesas($fecha_inicio, $fecha_fin){
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("SELECT SUM(total_consumicion) AS total_consumicion , id_mesa AS id FROM Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
+    }
+
+   public static function tieneFacturaMenorImporte($fecha_inicio, $fecha_fin){
+    $objAccesoDato = AccesoDatos::obtenerInstancia();
+    $consulta = $objAccesoDato->prepararConsulta("SELECT MIN(total_consumicion) AS total_consumicion , id_mesa as id FROM Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa");
+    $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+    $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+    $consulta->execute();
+    return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
+    }
+
+    public static function tieneFacturaMayorImporte($fecha_inicio, $fecha_fin){
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("SELECT MAX(total_consumicion) AS total_consumicion , id_mesa as id FROM Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
+        }
+
+    public static function tieneMejoresComentarios($fecha_inicio, $fecha_fin){ 
+    
+    }
+    
+    public static function tienePeoresComentarios($fecha_inicio, $fecha_fin){ 
+    
     }
 
     private static function CrearCodigoCliente() : string{

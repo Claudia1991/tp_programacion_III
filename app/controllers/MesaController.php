@@ -69,7 +69,6 @@ class MesaController extends Mesa implements IApiUsable
     {
         $parametros = $request->getParsedBody()["body"];
         $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
-        $id_mesa = $parametros['id_mesa'];
         $codigo_cliente = $parametros['codigo_cliente'];
         $codigo_mesa_estado = $parametros['codigo_mesa_estado'];
         $id_sector = $dataToken['id_sector'];

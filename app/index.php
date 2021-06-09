@@ -19,6 +19,7 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/PedidoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/EncuestaController.php';
+require_once './controllers/ReportesController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -40,7 +41,7 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 $app->group('/autenticacion', function (RouteCollectorProxy $group) {
     //Accesible para todos los usuarios.
     $group->post('/login', \UsuarioController::class . ':Login'); 
-});
+})->add(\LoggerMiddleware::class . ':LogOperacion');
 
 $app->group('/usuarios', function (RouteCollectorProxy $group) { 
     //Accesible solo por los Socios.
@@ -50,8 +51,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->put('[/]', \UsuarioController::class . ':ModificarUno');
     $group->put('/activarTemporada', \UsuarioController::class . ':ActivarTemporada');
     $group->delete('[/]', \UsuarioController::class . ':BorrarUno');
-})->add(\LoggerMiddleware::class . ':LogOperacion')
-->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
@@ -59,10 +59,10 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
     $group->get('[/]', \ProductoController::class . ':TraerTodos');
     $group->get('/{id}', \ProductoController::class . ':TraerUno');
     $group->post('[/]', \ProductoController::class . ':CargarUno');
+    $group->post('/cargaCsv', \ProductoController::class . ':CargarDesdeCsv');
     $group->put('[/]', \ProductoController::class . ':ModificarUno');
     $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
-})->add(\LoggerMiddleware::class . ':LogOperacion')
-->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->group('/pedidos', function (RouteCollectorProxy $group) {
@@ -93,14 +93,16 @@ $app->group('/encuestas', function (RouteCollectorProxy $group) {
     ->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
     ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
     $group->post('[/]', \EncuestaController::class . ':CargarUno'); 
-})->add(\LoggerMiddleware::class . ':LogOperacion');
+});
 
 
 $app->group('/reportes', function (RouteCollectorProxy $group) {
-    $group->get('/fecha_inicio={inicio}&fecha_fin={fin}', \ReportesController::class . ':TraerTodos'); 
-})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
-->add(\LoggerMiddleware::class . ':LogOperacion')
-->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
+    $group->get('/empleados/estadistica={estadistica}&fecha_inicio={inicio}&fecha_fin={fin}', \ReportesController::class . ':ReportesEmpleados'); 
+    $group->get('/pedidos/estadistica={estadistica}&fecha_inicio={inicio}&fecha_fin={fin}', \ReportesController::class . ':ReportesPedidos'); 
+    $group->get('/mesas/estadistica={estadistica}&fecha_inicio={inicio}&fecha_fin={fin}', \ReportesController::class . ':ReportesMesas');  
+});
+    //->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+// ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->get('[/]', function (Request $request, Response $response) {    
     $response->getBody()->write("Desarrollado por Claudia Jara");

@@ -63,7 +63,7 @@ class UsuariosMiddleware{
     public function VerificarAccesoSectores(Request $request, RequestHandler $handler): Response{
         /**
          * Pedidos
-         * ModificarUno => Cambia el estado del pedido, todos los sectores menos el mozo o el socio
+         * ModificarUno => Cambia el estado del pedido, todos los sectores y el mozo, el socio no tiene permisos aqui.
          */
         $method = $request->getMethod();
          $dataToken = json_decode($request->getParsedBody()["dataToken"], true);
@@ -74,7 +74,7 @@ class UsuariosMiddleware{
             $response->getBody()->write(json_encode(array("error" => "Error en los datos ingresados en el dataToken")));
             $response = $response->withStatus(400);
          }else{
-            if($tipo_usuario == self::$id_tipo_empleado && in_array($id_sector, self::SectoresEmpleados())){
+            if($tipo_usuario == self::$id_tipo_empleado && in_array($id_sector, self::SectoresEmpleadosYMozo())){
                $response = $handler->handle($request);
             }else{
                $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
@@ -101,7 +101,7 @@ class UsuariosMiddleware{
            $response = $response->withStatus(400);
         }else{
            if(($tipo_usuario == self::$id_tipo_empleado || $tipo_usuario == self::$id_tipo_socio) 
-           && !in_array($id_sector, self::SectoresEmpleados())){
+           && !in_array($id_sector, self::SectoresEmpleadosSinMozoSinSocio())){
               $response = $handler->handle($request);
            }else{
               $response->getBody()->write(json_encode(array("error" => "No tienes accesos.")));
@@ -111,9 +111,13 @@ class UsuariosMiddleware{
        return $response->withHeader('Content-Type', 'application/json');
     }
 
-    private static function SectoresEmpleados(){
+    private static function SectoresEmpleadosSinMozoSinSocio(){
         return [1,2,3,4];
     }
+
+    private static function SectoresEmpleadosYMozo(){
+      return [1,2,3,4,5];
+  }
 }
 
 ?>

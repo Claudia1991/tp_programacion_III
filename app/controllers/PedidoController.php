@@ -36,7 +36,7 @@ class PedidoController extends Pedido implements IApiUsable
             $id_pedido_creado = $pedido->crearPedido();
             $consumicion = ($producto->precio * $cantidad) + $mesa->total_consumicion;
             Mesa::actualizarConsumicionMesa($mesa->id, $mesa->codigo_cliente, $consumicion);
-            $payload = json_encode(array("mensaje" => "Pedido creado con exito. Id pedido creado: " . $id_pedido_creado));
+            $payload = json_encode(array("id_pedido_creado" =>  $id_pedido_creado));
             $response = $response->withStatus(201);
           }
         }
@@ -114,24 +114,54 @@ class PedidoController extends Pedido implements IApiUsable
           $payload = json_encode(array("error" => "Error en los parametros ingresados para modificar el estado de un pedido."));
           $response = $response->withStatus(400);
         }else{
-          //Es algun sector(cocina 1 / candy bar 2 / barra tragos 3 / barra cervezas 4)
-          $pedido = Pedido::obtenerSegunIdySector($id_pedido, $id_sector);
-          if(!$pedido){
-            $payload = json_encode(array("error" => "No existe el pedido que quiere actualizar o no es de su sector."));
+
+          if(!in_array($estado_pedido, $this->EstadosPedidos())){
+            $payload = json_encode(array("error" => "No existe el estado pedido al que desea cambiar."));
             $response = $response->withStatus(400);
           }else{
-            /**
-             * Logica de negocio:
-             */
-            if($estado_pedido == 2 && isset($minutos_preparacion) && $pedido->id_estado == 1){
-              Pedido::tomarPedido($id_pedido, $minutos_preparacion, $id_usuario);
-              $payload = json_encode(array("mensaje" => "Pedido tomado con exito."));
-            }elseif($estado_pedido == 3 && $pedido->id_estado == 2 && $pedido->id_empleado == $id_usuario){
-              Pedido::entregarPedido($id_pedido);
-              $payload = json_encode(array("mensaje" => "Pedido terminado con exito."));
+            if($id_sector == 5){
+              //Mozo
+              //Solo el mozo puede cancelar el pedido o volver un estado para atras.
+              //Busco el pedido
+              $pedido = Pedido::obtenerSegunId($id_pedido);
+              if(!$pedido){
+                $payload = json_encode(array("error" => "Siendo mozo, no existe el pedido buscado."));
+                $response = $response->withStatus(400);
+              }else{
+                if($estado_pedido == 4){
+                  //Estado 4 - cancelado
+                  Pedido::cancelarPedido($id_pedido);
+                  $payload = json_encode(array("mensaje" => "El pedido fue cancelado por el mozo id: " . $id_usuario));  
+                }elseif($estado_pedido == 1 && $pedido->id_estado == 3){
+                  //El estado del es 3 - listo servir y se quiero pasar a 1 - pendiente.
+                  Pedido::volverAPendientePedido($id_pedido);
+                  $payload = json_encode(array("mensaje" => "El pedido fue pasado a pendiente preparacion."));
+                }else{
+                  $payload = json_encode(array("error" => "Siendo mozo, tus estados solo son 3 - listo para servir o 4 - cancelado."));
+                  $response = $response->withStatus(400);
+                }
+              }
             }else{
-              $payload = json_encode(array("error" => "No se puede modificar el estado del pedido."));
-              $response = $response->withStatus(400);
+              //Es algun sector(cocina 1 / candy bar 2 / barra tragos 3 / barra cervezas 4)
+              $pedido = Pedido::obtenerSegunIdySector($id_pedido, $id_sector);
+              if(!$pedido){
+                $payload = json_encode(array("error" => "No existe el pedido que quiere actualizar o no es de su sector."));
+                $response = $response->withStatus(400);
+              }else{
+                /**
+                 * Logica de negocio:
+                 */
+                if($estado_pedido == 2 && isset($minutos_preparacion) && $pedido->id_estado == 1){
+                  Pedido::tomarPedido($id_pedido, $minutos_preparacion, $id_usuario);
+                  $payload = json_encode(array("mensaje" => "Pedido tomado con exito."));
+                }elseif($estado_pedido == 3 && $pedido->id_estado == 2 && $pedido->id_empleado == $id_usuario){
+                  Pedido::entregarPedido($id_pedido);
+                  $payload = json_encode(array("mensaje" => "Pedido terminado con exito."));
+                }else{
+                  $payload = json_encode(array("error" => "No se puede modificar el estado del pedido."));
+                  $response = $response->withStatus(400);
+                }
+              }
             }
           }
         }
@@ -145,5 +175,10 @@ class PedidoController extends Pedido implements IApiUsable
       $response = $response->withStatus(405);
       $response->getBody()->write($payload);
       return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    private function EstadosPedidos(){
+      /** 1 Pendientes, 2 En preparacion, 3 Listo para servir, 4 Cancelado */
+      return [1,2,3,4];
     }
 }

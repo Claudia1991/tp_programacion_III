@@ -109,7 +109,6 @@ class UsuarioController extends Usuario implements IApiUsable
         }else{
           //Verificar si existe el usuario ingresado
           $usuarioAModificar = Usuario::obtenerUsuario($id);
-          var_dump($usuarioAModificar);
           if(!$usuarioAModificar){
             $payload = json_encode(array("error" => "No existe el usuario a modificar"));
             $response = $response->withStatus(400);
