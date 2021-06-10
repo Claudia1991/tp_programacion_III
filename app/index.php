@@ -56,10 +56,11 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
     //Accesible solo por los Socios.
-    $group->get('[/]', \ProductoController::class . ':TraerTodos');
+    $group->get('/descargaCsv', \ProductoController::class . ':DescargaCsv');
+    $group->get('/', \ProductoController::class . ':TraerTodos');
     $group->get('/{id}', \ProductoController::class . ':TraerUno');
-    $group->post('[/]', \ProductoController::class . ':CargarUno');
     $group->post('/cargaCsv', \ProductoController::class . ':CargarDesdeCsv');
+    $group->post('[/]', \ProductoController::class . ':CargarUno');
     $group->put('[/]', \ProductoController::class . ':ModificarUno');
     $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
 })->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')

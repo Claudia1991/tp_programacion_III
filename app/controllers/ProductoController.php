@@ -1,29 +1,23 @@
 <?php
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 require_once './models/Producto.php';
 require_once './interfaces/IApiUsable.php';
 
 class ProductoController extends Producto implements IApiUsable
 {
 
-  public function CargarDesdeCsv(Request $request,Response $response, $args)
+  public function CargarDesdeCsv($request,$response, $args)
   {
-        $archivo_subido = $request->getUploadedFiles();
-        var_dump($archivo_subido);
-        var_dump($response);
-        var_dump($args);
-        $nombre_real = $archivo_subido['archivoCsv']->getClientFileName();
+        $archivo_csv =$_FILES["archivoCsv"];
+        $nombre_real = $_FILES["archivoCsv"]["name"];
         $extension = explode(".", $nombre_real)[1];
-        if(!isset($archivo_subido) || $extension != "csv"){
+        if(!isset($archivo_csv) || $extension != "csv"){
           $payload = json_encode(array("error" => "Error en el archivo CSV."));
           $response = $response->withStatus(400);
         }else{
           $fechaActual = new DateTime();
           $marcaTemporal = $fechaActual->getTimestamp();
-          $ruta_temporal = "./temporales/" . $marcaTemporal;
-          $archivo_temporal = $archivo_subido['archivoCsv'];
-          $archivo_temporal->moveTo($ruta_temporal);
+          $ruta_temporal = "./temporales/" . $marcaTemporal . "." . $extension;
+          move_uploaded_file($_FILES["archivoCsv"]["tmp_name"], $ruta_temporal);
           $archivo_abierto = fopen($ruta_temporal, 'r');
         if ($archivo_abierto != null) {
           $cantidad_procesado_exito = 0;
@@ -49,6 +43,32 @@ class ProductoController extends Producto implements IApiUsable
           $payload = json_encode(array("error" => "Error en el archivo subido."));
           $response = $response->withStatus(400);
         }
+      }
+      $response->getBody()->write($payload);
+      return $response->withHeader('Content-Type', 'application/json');
+  }
+
+  public function DescargaCsv($request,$response, $args)
+  {
+    //TODO: funciona ok, verificar la descarga.
+      $fechaActual = new DateTime();
+      $marcaTemporal = $fechaActual->getTimestamp();
+      $ruta_archivo_descargar = "./temporales/" . $marcaTemporal . "-productos.csv";
+      $archivo_descargar = fopen($ruta_archivo_descargar, 'a');
+      $payload = null;
+      if($archivo_descargar != null){
+        $productos = Producto::obtenerTodos();
+        foreach ($productos as $producto) {
+          $linea = Producto::productoToString($producto);
+          fwrite($archivo_descargar, $linea . "\n");
+        }
+        fclose($archivo_descargar);
+        $payload = json_encode(array("mensaje" => "Archivo descargado en formato csv"));
+        $response->getBody()->write($payload);
+        readfile($ruta_archivo_descargar);
+        return $response->withHeader('Content-Type', 'application/csv')->withStatus(200);
+      }else{
+        $payload = json_encode(array("error" => "Ocurrio un error al descargar los productos en CSV"));
       }
       $response->getBody()->write($payload);
       return $response->withHeader('Content-Type', 'application/json');

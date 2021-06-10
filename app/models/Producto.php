@@ -54,4 +54,8 @@ class Producto
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }
+
+    public static function productoToString(Producto $producto){
+        return "Id: " . $producto->id . " Nombre: " . $producto->nombre . " Precio: " . $producto->precio;
+    }
 }
