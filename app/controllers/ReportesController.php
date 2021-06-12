@@ -13,31 +13,46 @@ class ReportesController{
             c- Cantidad de operaciones de todos por sector, listada por cada empleado.
             d- Cantidad de operaciones de cada uno por separado. */
             $estadistica = filter_var($args["estadistica"], FILTER_VALIDATE_BOOLEAN);
-            $fecha_inicio = $args["inicio"];
-            $fecha_fin = $args["fin"];
-            $payload = '';
-            if(!isset($estadistica) || !isset($fecha_inicio) || !isset($fecha_fin)){
-                $payload = json_encode(array("error" => "Error en los parametros ingresados para obtener reportes de mesas."));
+        $fecha_inicio = $args["inicio"];
+        $fecha_fin = $args["fin"];
+        $payload = '';
+        if(!isset($estadistica)){
+            $payload = json_encode(array("error" => "Error en los parametros ingresados para obtener reportes de mesas."));
+            $response = $response->withStatus(400);
+        }else{
+            if(!$estadistica && (!$this->validateDate($fecha_inicio) || !$this->validateDate($fecha_fin))){
+                var_dump($this->validateDate($fecha_inicio));
+                var_dump($fecha_inicio);
+                $payload = json_encode(array("error" => "Error en las fechas ingresadas sin estadisticas."));
                 $response = $response->withStatus(400);
             }else{
+                ob_clean();
+                ob_start();
+                $pdf = new PdfServicio();
                 if($estadistica){
-                    //TODO: ESTADISTICAS 30 DIAS (desde hoy 30 dias hacia atras)
-                    //LOGICA PARA TRAER LAS FECHAS
-                }else{
-                    //TODO: LOGICA VALIDAR FECHAS
-                    ob_start();
-                    $pdf = new PdfServicio();
-                    $pdf->SetTitle("Reportes Mesas");
-                    $pdf->Output();
-                    ob_end_flush();
-                    $payload = json_encode(array("mensaje" => "Descargado"));
-                    $response->getBody()->write($payload);
-                    return $response->withHeader('Content-Type', 'application/pdf');
+                    $fecha_fin = date('Y-m-d');
+                    $fecha_inicio = date('Y-m-d', strtotime($fecha_fin . ' -30 days')); 
                 }
+                $pdf->SetTitle("Reportes Pedidos");
+                $pdf->AddPage();
+                //TODO: verificar funcionamiento
+                $pdf->Cell(40,10,'Los días y horarios que se Ingresaron al sistema: ' ,0,1);
+                $pdf->MultiCell(400,100, Usuario::ingresosSistema($fecha_inicio, $fecha_fin));
+                $pdf->Cell(40,10,'Cantidad de operaciones de todos por sector: ' ,0,1);
+                $pdf->MultiCell(400,100, Usuario::operacionesPorSector($fecha_inicio, $fecha_fin));
+                $pdf->Cell(40,10,'Cantidad de operaciones de todos por sector, listada por cada empleado: ' ,0,1);
+                $pdf->MultiCell(400,100, Usuario::operacionesPorSectorYPorUsuario($fecha_inicio, $fecha_fin));
+                $pdf->Cell(40,10,'Cantidad de operaciones de cada uno por separado: ' ,0,1);
+                $pdf->MultiCell(400,100, Usuario::operacionesPorUsuario($fecha_inicio, $fecha_fin));
+                $pdf->Output();
+                ob_end_flush();
+                $payload = json_encode(array("mensaje" => "Descargado"));
+                $response->getBody()->write($payload);
+                return $response->withHeader('Content-Type', 'application/pdf');
             }
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json');
-
+        }
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
     public function ReportesPedidos($request, $response, $args){
         /**a- Lo que más se vendió.

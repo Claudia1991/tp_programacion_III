@@ -77,5 +77,71 @@ class Usuario
     }
 
     /** Reportes */
+
+    public static function ingresosSistema($fecha_inicio, $fecha_fin)
+    {
+        //TODO
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, sr.descripcion, l.fecha_hora FROM `Logs` l
+        inner JOIN Usuarios u on u.id = l.id_usuario
+        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        WHERE l.entidad = 'SISTEMA' AND operacion = 'Ingreso Sistema' and  cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+    public static function operacionesPorSector($fecha_inicio, $fecha_fin)
+    {
+        //TODO
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT sr.descripcion, l.entidad, l.operacion, 
+        l.datos_operacion, l.fecha_hora FROM `Logs` l
+        inner JOIN Usuarios u on u.id = l.id_usuario
+        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
+        ORDER by id_usuario");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+    public static function operacionesPorSectorYPorUsuario($fecha_inicio, $fecha_fin)
+    {
+        //TODO
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, sr.descripcion, l.entidad, l.operacion, 
+        l.datos_operacion, l.fecha_hora FROM `Logs` l
+        inner JOIN Usuarios u on u.id = l.id_usuario
+        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
+        ORDER by id_usuario");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+    public static function operacionesPorUsuario($fecha_inicio, $fecha_fin)
+    {
+        //TODO
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, l.entidad, l.operacion, 
+        l.datos_operacion, l.fecha_hora FROM `Logs` l
+        inner JOIN Usuarios u on u.id = l.id_usuario
+        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
+        ORDER by id_usuario");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
     
 }
