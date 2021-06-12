@@ -75,4 +75,7 @@ class Usuario
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }
+
+    /** Reportes */
+    
 }

@@ -15,8 +15,10 @@ class Encuesta
     public function crearEncuesta()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO Encuesta (puntuacion_descripcion, puntuacion_mozo, puntuacion_mesa, puntuacion_cocinero,
-        puntuacion_restaurante,id_mesa, codigo_cliente,fecha_hora) VALUES (:puntuacion_descripcion, :puntuacion_mozo, :puntuacion_mesa, :puntuacion_cocinero,
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO Encuesta (puntuacion_descripcion, puntuacion_mozo, puntuacion_mesa,
+         puntuacion_cocinero,
+        puntuacion_restaurante, id_mesa, codigo_cliente,fecha_hora) VALUES (:puntuacion_descripcion, :puntuacion_mozo, :puntuacion_mesa, 
+        :puntuacion_cocinero,
         :puntuacion_restaurante, :id_mesa, :codigo_cliente, :fecha_hora)");
         $consulta->bindValue(':puntuacion_descripcion', $this->puntuacion_descripcion, PDO::PARAM_STR);
         $consulta->bindValue(':puntuacion_mozo', $this->puntuacion_mozo, PDO::PARAM_INT);

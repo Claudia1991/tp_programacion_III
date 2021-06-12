@@ -58,9 +58,11 @@ class Pedido
     public static function obtenerSegunId($id_pedido)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.id_mesa, p.codigo_cliente,ep.codigo as id_estado, ep.descripcion as estado_descripcion,
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.id_mesa, p.codigo_cliente,ep.codigo as id_estado, 
+        ep.descripcion as estado_descripcion,
         pr.id as id_producto, pr.nombre as producto_descripcion, p.id_sector, sr.descripcion as sector_descripcion, 
-       p.id_empleado, u.nombre as empleado_descripcion , p.minutos_preparacion, p.fecha_hora_inicio, p.fecha_hora_fin, p.cantidad, p.baja_logica FROM Pedidos p
+       p.id_empleado, u.nombre as empleado_descripcion , p.minutos_preparacion, p.fecha_hora_inicio, p.fecha_hora_fin, p.cantidad, 
+       p.baja_logica FROM Pedidos p
         INNER JOIN Estados_Pedidos ep on ep.codigo = p.id_estado
         INNER JOIN Productos pr on pr.id = p.id_producto
         left JOIN Sectores_Restaurant sr on sr.codigo =  p.id_sector
@@ -211,4 +213,6 @@ class Pedido
         $consulta->bindValue(':codigo_cliente', $codigo_cliente, PDO::PARAM_INT);
         $consulta->execute();
     }
+
+    /** Reportes */
 }
