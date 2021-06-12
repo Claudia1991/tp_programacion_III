@@ -51,7 +51,8 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->put('[/]', \UsuarioController::class . ':ModificarUno');
     $group->put('/activarTemporada', \UsuarioController::class . ':ActivarTemporada');
     $group->delete('[/]', \UsuarioController::class . ':BorrarUno');
-})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+})->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->group('/productos', function (RouteCollectorProxy $group) {
@@ -63,7 +64,8 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
     $group->post('[/]', \ProductoController::class . ':CargarUno');
     $group->put('[/]', \ProductoController::class . ':ModificarUno');
     $group->delete('/{id}', \ProductoController::class . ':BorrarUno');
-})->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+})->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
 ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->group('/pedidos', function (RouteCollectorProxy $group) {
@@ -94,7 +96,7 @@ $app->group('/encuestas', function (RouteCollectorProxy $group) {
     ->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
     ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
     $group->post('[/]', \EncuestaController::class . ':CargarUno'); 
-});
+})->add(\LoggerMiddleware::class . ':LogOperacion');
 
 
 $app->group('/reportes', function (RouteCollectorProxy $group) {

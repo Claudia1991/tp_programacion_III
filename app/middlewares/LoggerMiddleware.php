@@ -53,9 +53,47 @@ class LoggerMiddleware
                 Log::Add($id_usuario, $id_sector, 'MESAS', $codigo_cliente, 'Modificar uno', json_encode($request_api), $response->getBody());
             }elseif($metodo == 'GET' && $http_status_code == 200){
                 Log::Add($id_usuario, $id_sector, 'MESAS', null, 'Obtener', json_encode($request_api), $response->getBody());
+            }elseif($metodo == 'DELETE' && $http_status_code == 200){
+                Log::Add($id_usuario, $id_sector, 'MESAS', null, 'Borrar', json_encode($request_api), $response->getBody());
             }else{
                 Log::Add($id_usuario, $id_sector, 'ERROR', null, 'Error', json_encode($request_api), $response->getBody());
             }
+        }elseif(str_contains($path, 'productos')){
+            /** Productos */
+            $request_api = $request->getParsedBody()["body"];
+            $data_token = json_decode($request->getParsedBody()["dataToken"], true);
+            $id_usuario = $data_token['id_usuario'];
+            $id_sector = $data_token['id_sector'];
+            if($metodo == 'POST' && $http_status_code == 201){
+                Log::Add($id_usuario, $id_sector, 'PRODUCTOS', 0, 'Cargar uno', json_encode($request_api), $response->getBody());
+            }elseif($metodo == 'PUT' && $http_status_code == 200){
+                $id_producto = $request_api['id'];
+                Log::Add($id_usuario, $id_sector, 'PRODUCTOS', $id_producto, 'Modificar uno', json_encode($request_api), $response->getBody());
+            }elseif($metodo == 'GET' && $http_status_code == 200){
+                Log::Add($id_usuario, $id_sector, 'PRODUCTOS', null, 'Obtener', json_encode($request_api), $response->getBody());
+            }else{
+                Log::Add($id_usuario, $id_sector, 'ERROR', null, 'Error', json_encode($request_api), $response->getBody());
+            }
+        }elseif(str_contains($path, 'usuarios')){
+            /** Usuarios */
+            $request_api = $request->getParsedBody()["body"];
+            $data_token = json_decode($request->getParsedBody()["dataToken"], true);
+            $id_usuario = $data_token['id_usuario'];
+            $id_sector = $data_token['id_sector'];
+            if($metodo == 'POST' && $http_status_code == 201){
+                Log::Add($id_usuario, $id_sector, 'USUARIOS', 0, 'Cargar uno', json_encode($request_api), $response->getBody());
+            }elseif($metodo == 'PUT' && $http_status_code == 200){
+                $id_usuario = $request_api['id'];
+                Log::Add($id_usuario, $id_sector, 'USUARIOS', $id_usuario, 'Modificar uno', json_encode($request_api), $response->getBody());
+            }elseif($metodo == 'GET' && $http_status_code == 200){
+                Log::Add($id_usuario, $id_sector, 'USUARIOS', null, 'Obtener', json_encode($request_api), $response->getBody());
+            }else{
+                Log::Add($id_usuario, $id_sector, 'ERROR', null, 'Error', json_encode($request_api), $response->getBody());
+            }
+        }elseif(str_contains($path, 'encuestas')){
+            /** Encuestas */
+            $request_api = $request->getParsedBody();
+            Log::Add(0, 0, 'ENCUESTAS', null, null, json_encode($request_api), $response->getBody());
         }
         return $response;
     }

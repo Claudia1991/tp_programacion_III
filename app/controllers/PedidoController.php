@@ -130,7 +130,7 @@ class PedidoController extends Pedido implements IApiUsable
               }else{
                 if($estado_pedido == 4){
                   //Estado 4 - cancelado
-                  Pedido::cancelarPedido($id_pedido);
+                  Pedido::cancelarPedido($id_pedido, $id_usuario);
                   $payload = json_encode(array("mensaje" => "El pedido fue cancelado por el mozo id: " . $id_usuario));  
                 }elseif($estado_pedido == 1 && $pedido->id_estado == 3){
                   //El estado del es 3 - listo servir y se quiero pasar a 1 - pendiente.

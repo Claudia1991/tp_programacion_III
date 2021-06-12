@@ -85,7 +85,7 @@ class Pedido
         INNER JOIN Productos pr on pr.id = p.id_producto
         left JOIN Sectores_Restaurant sr on sr.codigo =  p.id_sector
         left JOIN Usuarios u on u.id = p.id_empleado
-        where p.id = :id and p.id_sector = :id_sector and p.baja_logica = :baja_logica");
+        where p.id = :id and p.id_sector = :id_sector and p.baja_logica = :baja_logica and p.id_estado <> 4");
         $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
         $consulta->bindValue(':id_sector', $id_sector, PDO::PARAM_INT);
         $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
@@ -115,7 +115,7 @@ class Pedido
         INNER JOIN Productos pr on pr.id = p.id_producto
         left JOIN Sectores_Restaurant sr on sr.codigo =  p.id_sector
         left JOIN Usuarios u on u.id = p.id_empleado
-        where p.id_sector = :id_sector and p.baja_logica = :baja_logica");
+        where p.id_sector = :id_sector and p.baja_logica = :baja_logica and p.id_estado <> 4");
         $consulta->bindValue(':id_sector', $sector, PDO::PARAM_INT);
         $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
         $consulta->execute();
@@ -171,14 +171,16 @@ class Pedido
         $consulta->execute();
     }
 
-    public static function cancelarPedido($id_pedido)
+    public static function cancelarPedido($id_pedido, $id_usuario)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE Pedidos SET id_estado = :id_estado, fecha_hora_fin = :fecha_hora_fin
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE Pedidos SET id_estado = :id_estado, fecha_hora_fin = :fecha_hora_fin, 
+        id_empleado = :id_usuario
          WHERE id = :id and baja_logica = :baja_logica");
         $consulta->bindValue(':id_estado',4, PDO::PARAM_INT);
         $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
         $consulta->bindValue(':baja_logica', 0, PDO::PARAM_INT);
+        $consulta->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT);
         $consulta->bindValue(':fecha_hora_fin', date('Y-m-d H:i'), PDO::PARAM_STR);
         $consulta->execute();
     }

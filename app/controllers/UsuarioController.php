@@ -61,7 +61,7 @@ class UsuarioController extends Usuario implements IApiUsable
             $id_generado = $usr->crearUsuario();
             
             $payload = json_encode(array("mensaje" => "Usuario creado con exito, id generado: " . $id_generado));
-            $response = $response->withStatus(200);
+            $response = $response->withStatus(201);
           }
         }
 

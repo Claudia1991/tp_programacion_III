@@ -50,7 +50,7 @@ class Mesa
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT m.id, m.codigo_cliente, m.nombre_cliente, m.total_consumicion, m.id_mozo, 
         u.nombre as mozo_nombre, m.codigo_estado_mesa, em.descripcion as codigo_estado_mesa_descripcion, m.fecha_hora_inicio, m.fecha_hora_fin   FROM Mesas m 
-        INNER JOIN Usuarios u on u.id = m.id_mozo 
+        LEFT JOIN Usuarios u on u.id = m.id_mozo 
         inner join Estados_Mesas em on em.codigo = m.codigo_estado_mesa
         where codigo_cliente = :codigo_cliente");
         $consulta->bindValue(':codigo_cliente', $codigo_cliente, PDO::PARAM_STR);
@@ -72,8 +72,7 @@ class Mesa
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta("UPDATE Mesas SET codigo_cliente = :codigo_cliente, nombre_cliente = :nombre_cliente,
-         total_consumicion = :total_consumicion, id_mozo = :id_mozo, codigo_estado_mesa = :codigo_estado_mesa, fecha_hora_inicio = :fecha_hora_inicio
-         fecha_hora_fin = :fecha_hora_fin WHERE id = :id_mesa");
+         total_consumicion = :total_consumicion, id_mozo = :id_mozo, codigo_estado_mesa = :codigo_estado_mesa, fecha_hora_inicio = :fecha_hora_inicio,  fecha_hora_fin = :fecha_hora_fin, libre = :libre WHERE id = :id_mesa");
         $consulta->bindValue(':codigo_cliente', null);
         $consulta->bindValue(':nombre_cliente', null);
         $consulta->bindValue(':total_consumicion', null);
@@ -81,6 +80,7 @@ class Mesa
         $consulta->bindValue(':codigo_estado_mesa', null);
         $consulta->bindValue(':fecha_hora_inicio', null);
         $consulta->bindValue(':fecha_hora_fin', null);
+        $consulta->bindValue(':libre', 1, PDO::PARAM_INT);
         $consulta->bindValue(':id_mesa', $id_mesa, PDO::PARAM_INT);
         $consulta->execute();
     }
