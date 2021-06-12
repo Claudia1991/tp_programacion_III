@@ -67,10 +67,11 @@ class ReportesController{
                 }
                 $pdf->SetTitle("Reportes Pedidos");
                 $pdf->AddPage();
-                $pdf->Cell(40,10,'Lo que mas se vendio: ' . Mesa::masUsada($fecha_inicio, $fecha_fin) ,0,1);
-                $pdf->Cell(40,10,'Lo que menos se vendio: ' . Mesa::menosUsada($fecha_inicio, $fecha_fin) ,0,1);
-                $pdf->Cell(40,10,'Id mesa mas facturo: ' . Mesa::mayorFacturacion($fecha_inicio, $fecha_fin) ,0,1);
-                $pdf->Cell(40,10,'Los cancelados: ' . Mesa::menorFacturacion($fecha_inicio, $fecha_fin) ,0,1);
+                //TODO: verificar funcionamiento
+                $pdf->Cell(40,10,'Lo que mas se vendio: ' . Pedido::masVendido($fecha_inicio, $fecha_fin) ,0,1);
+                $pdf->Cell(40,10,'Lo que menos se vendio: ' . Pedido::menosVendido($fecha_inicio, $fecha_fin) ,0,1);
+                $pdf->Cell(40,10,'Los que no se entregaron en el tiempo estipulado: ' . Pedido::entregadosFueraTiempo($fecha_inicio, $fecha_fin) ,0,1);
+                $pdf->Cell(40,10,'Los cancelados: ' . Pedido::cancelados($fecha_inicio, $fecha_fin) ,0,1);
                 $pdf->Output();
                 ob_end_flush();
                 $payload = json_encode(array("mensaje" => "Descargado"));

@@ -215,4 +215,68 @@ class Pedido
     }
 
     /** Reportes */
+    
+    public static function masVendido($fecha_inicio, $fecha_fin)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT SUM(cantidad) as cantidad_vendida, id_producto, p.nombre FROM Pedidos pp
+        inner join Productos p on p.id = pp.id_producto
+        where cast(fecha_hora_fin AS date) BETWEEN :fecha_inicio AND :fecha_fin and id_estado <> 4 and id_estado = 3 and baja_logica = 1
+        GROUP by id_producto 
+        ORDER by cantidad_vendida DESC LIMIT 1");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        $masvendido = $consulta->fetch();
+        return 'Id producto: ' . $masvendido['id_producto'] . ' Nombre: ' . $masvendido['nombre'] . 
+        ' Cantidad Vendida: ' .$masvendido['cantidad_vendida'];
+    }
+    
+    public static function menosVendido($fecha_inicio, $fecha_fin)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT SUM(cantidad) as cantidad_vendida, id_producto, p.nombre FROM Pedidos pp
+        inner join Productos p on p.id = pp.id_producto
+        where cast(fecha_hora_fin AS date) BETWEEN :fecha_inicio AND :fecha_fin and id_estado <> 4 and id_estado = 3 and baja_logica = 1
+        GROUP by id_producto 
+        ORDER by cantidad_vendida asc LIMIT 1");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        $masvendido = $consulta->fetch();
+        return 'Id producto: ' . $masvendido['id_producto'] . ' Nombre: ' . $masvendido['nombre'] . 
+        ' Cantidad Vendida: ' .$masvendido['cantidad_vendida'];
+    }
+
+    public static function entregadosFueraTiempo($fecha_inicio, $fecha_fin)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT count(id_producto) as entregados_fuera_tiempo, id_producto, p.nombre
+        FROM Pedidos pp
+        inner join Productos p on p.id = pp.id_producto
+        where cast(fecha_hora_fin AS date) BETWEEN :fecha_inicio AND :fecha_fin and id_estado = 3 and baja_logica = 1
+        and ROUND(TIME_TO_SEC(TIMEDIFF(fecha_hora_fin, fecha_hora_inicio))/60) > minutos
+        GROUP by id_producto 
+        ORDER by id_producto asc");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        $entregadosFueraTiempo = $consulta->fetch();
+        return $entregadosFueraTiempo; //TODO
+    }
+    
+    public static function cancelados($fecha_inicio, $fecha_fin)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT count(id_producto) as cancelados, id_producto, p.nombre FROM Pedidos pp
+        inner join Productos p on p.id = pp.id_producto
+        where cast(fecha_hora_fin AS date) BETWEEN :fecha_inicio AND :fecha_fin and id_estado = 4 and baja_logica = 1
+        GROUP by id_producto 
+        ORDER by id_producto asc");
+        $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
+        $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
+        $consulta->execute();
+        $masvendido = $consulta->fetch();
+        return $masvendido; //TODO
+    }
 }
