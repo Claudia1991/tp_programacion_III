@@ -80,7 +80,6 @@ class Usuario
 
     public static function ingresosSistema($fecha_inicio, $fecha_fin)
     {
-        //TODO
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, sr.descripcion, l.fecha_hora FROM `Logs` l
         inner JOIN Usuarios u on u.id = l.id_usuario
@@ -89,59 +88,82 @@ class Usuario
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
-
-        return $consulta->fetchObject('Usuario');
+        $reportes = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($reportes as $reporte) {
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Sector: ' 
+            . $reporte['descripcion'] . 'Fecha hora: ' . $reporte['fecha_hora'] ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
 
     public static function operacionesPorSector($fecha_inicio, $fecha_fin)
     {
-        //TODO
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT sr.descripcion, l.entidad, l.operacion, 
-        l.datos_operacion, l.fecha_hora FROM `Logs` l
-        inner JOIN Usuarios u on u.id = l.id_usuario
-        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_sector, sr.descripcion, count(*) as cantidad_operaciones FROM `Logs` l
+        inner JOIN Sectores_Restaurant sr on sr.codigo = l.id_sector
         where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
-        ORDER by id_usuario");
+        GROUP by l.id_sector, sr.descripcion
+        ORDER by l.id_sector ASC");
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
 
-        return $consulta->fetchObject('Usuario');
+        $reportes = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($reportes as $reporte) {
+            $reporte_line  = 'Id sector: ' . $reporte['id_sector'] . ' Descripcion: '. $reporte['descripcion'] . ' Cantidad operaciones: ' 
+            . $reporte['cantidad_operaciones'] ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
 
     public static function operacionesPorSectorYPorUsuario($fecha_inicio, $fecha_fin)
     {
-        //TODO
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, sr.descripcion, l.entidad, l.operacion, 
-        l.datos_operacion, l.fecha_hora FROM `Logs` l
-        inner JOIN Usuarios u on u.id = l.id_usuario
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario,u.nombre, sr.descripcion ,
+        COUNT(l.id_usuario) as cantidad_operaciones FROM `Logs` l
+        INNER JOIN Usuarios u on u.id = l.id_usuario
         INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
         where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
-        ORDER by id_usuario");
+        GROUP BY  l.id_usuario,u.nombre, sr.descripcion
+        ORDER by l.id_usuario");
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
 
-        return $consulta->fetchObject('Usuario');
+        $reportes = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($reportes as $reporte) {
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Sector: ' 
+            . $reporte['descripcion'] . ' Cantidad operaciones: ' . $reporte['cantidad_operaciones'] ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
 
     public static function operacionesPorUsuario($fecha_inicio, $fecha_fin)
     {
-        //TODO
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario, u.nombre, l.entidad, l.operacion, 
-        l.datos_operacion, l.fecha_hora FROM `Logs` l
-        inner JOIN Usuarios u on u.id = l.id_usuario
-        INNER join Sectores_Restaurant sr on sr.codigo = u.id_sector
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT l.id_usuario,u.nombre, COUNT(l.id_usuario) as cantidad_operaciones FROM `Logs` l
+        INNER JOIN Usuarios u on u.id = l.id_usuario
         where cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin
-        ORDER by id_usuario");
+        GROUP BY  l.id_usuario,u.nombre
+        ORDER by l.id_usuario");
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
 
-        return $consulta->fetchObject('Usuario');
+        $reportes = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($reportes as $reporte) {
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Cantidad operaciones: ' 
+            . $reporte['cantidad_operaciones'] ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
     
 }

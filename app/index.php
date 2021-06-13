@@ -103,9 +103,9 @@ $app->group('/reportes', function (RouteCollectorProxy $group) {
     $group->get('/empleados/estadistica={estadistica}[&fecha_inicio={inicio}&fecha_fin={fin}]', \ReportesController::class . ':ReportesEmpleados'); 
     $group->get('/pedidos/estadistica={estadistica}[&fecha_inicio={inicio}&fecha_fin={fin}]', \ReportesController::class . ':ReportesPedidos'); 
     $group->get('/mesas/estadistica={estadistica}[&fecha_inicio={inicio}&fecha_fin={fin}]', \ReportesController::class . ':ReportesMesas');  
-});
-    //->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
-// ->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
+})->add(\LoggerMiddleware::class . ':LogOperacion')
+->add(\UsuariosMiddleware::class . ':verificarAccesoSocios')
+->add(\AutenticacionMiddelware::class . ':verificarTokenUsuario');
 
 $app->get('[/]', function (Request $request, Response $response) {    
     $response->getBody()->write("Desarrollado por Claudia Jara - 2021");

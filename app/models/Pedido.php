@@ -253,18 +253,23 @@ class Pedido
     public static function entregadosFueraTiempo($fecha_inicio, $fecha_fin)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT count(id_producto) as entregados_fuera_tiempo, id_producto, p.nombre
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT count(id_producto) as entregados_fuera_tiempo, p.nombre
         FROM Pedidos pp
         inner join Productos p on p.id = pp.id_producto
         where cast(fecha_hora_fin AS date) BETWEEN :fecha_inicio AND :fecha_fin and id_estado = 3 and baja_logica = 1
-        and ROUND(TIME_TO_SEC(TIMEDIFF(fecha_hora_fin, fecha_hora_inicio))/60) > minutos
+        and ROUND(TIME_TO_SEC(TIMEDIFF(fecha_hora_fin, fecha_hora_inicio))/60) > pp.minutos_preparacion
         GROUP by id_producto 
         ORDER by id_producto asc");
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
-        $entregadosFueraTiempo = $consulta->fetch();
-        return $entregadosFueraTiempo; //TODO
+        $entregadosFueraTiempo = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($entregadosFueraTiempo as $pedido) {
+            $reporte_line  = ' Nombre: '. $pedido['nombre'] . ' Cantidad: ' . $pedido['entregados_fuera_tiempo']  ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
     
     public static function cancelados($fecha_inicio, $fecha_fin)
@@ -278,7 +283,13 @@ class Pedido
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();
-        $masvendido = $consulta->fetch();
-        return $masvendido; //TODO
+        $cancelados = $consulta->fetchAll();
+        $reportes_string = '';
+        foreach ($cancelados as $pedido) {
+            $reporte_line  = 'Id producto: ' . $pedido['id_producto'] . ' Nombre: '. $pedido['nombre'] . ' Cantidad: ' 
+            . $pedido['cancelados']  ;
+            $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
+        }
+        return $reportes_string;
     }
 }
