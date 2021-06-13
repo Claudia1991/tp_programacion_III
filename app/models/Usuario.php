@@ -91,8 +91,8 @@ class Usuario
         $reportes = $consulta->fetchAll();
         $reportes_string = '';
         foreach ($reportes as $reporte) {
-            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Sector: ' 
-            . $reporte['descripcion'] . 'Fecha hora: ' . $reporte['fecha_hora'] ;
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' - Nombre: '. $reporte['nombre'] . ' - Sector: ' 
+            . $reporte['descripcion'] . ' - Fecha hora: ' . $reporte['fecha_hora'] ;
             $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
         }
         return $reportes_string;
@@ -113,7 +113,7 @@ class Usuario
         $reportes = $consulta->fetchAll();
         $reportes_string = '';
         foreach ($reportes as $reporte) {
-            $reporte_line  = 'Id sector: ' . $reporte['id_sector'] . ' Descripcion: '. $reporte['descripcion'] . ' Cantidad operaciones: ' 
+            $reporte_line  = 'Id sector: ' . $reporte['id_sector'] . ' - Descripcion: '. $reporte['descripcion'] . ' - Operaciones: ' 
             . $reporte['cantidad_operaciones'] ;
             $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
         }
@@ -137,8 +137,8 @@ class Usuario
         $reportes = $consulta->fetchAll();
         $reportes_string = '';
         foreach ($reportes as $reporte) {
-            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Sector: ' 
-            . $reporte['descripcion'] . ' Cantidad operaciones: ' . $reporte['cantidad_operaciones'] ;
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' - Nombre: '. $reporte['nombre'] . ' - Sector: ' 
+            . $reporte['descripcion'] . ' - Operaciones: ' . $reporte['cantidad_operaciones'] ;
             $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
         }
         return $reportes_string;
@@ -159,7 +159,7 @@ class Usuario
         $reportes = $consulta->fetchAll();
         $reportes_string = '';
         foreach ($reportes as $reporte) {
-            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' Nombre: '. $reporte['nombre'] . ' Cantidad operaciones: ' 
+            $reporte_line  = 'Id usuario: ' . $reporte['id_usuario'] . ' - Nombre: '. $reporte['nombre'] . ' - Operaciones: ' 
             . $reporte['cantidad_operaciones'] ;
             $reportes_string = $reportes_string.PHP_EOL . $reporte_line;
         }

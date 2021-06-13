@@ -170,7 +170,7 @@ class Mesa
    public static function tieneFacturaMenorImporte($fecha_inicio, $fecha_fin){
     $objAccesoDato = AccesoDatos::obtenerInstancia();
     $consulta = $objAccesoDato->prepararConsulta("SELECT MIN(total_consumicion) AS total_consumicion , id_mesa as id FROM 
-    Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa limit 1");
+    Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa order by total_consumicion asc limit 1");
     $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
     $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
     $consulta->execute();
@@ -181,7 +181,7 @@ class Mesa
     public static function tieneFacturaMayorImporte($fecha_inicio, $fecha_fin){
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta("SELECT MAX(total_consumicion) AS total_consumicion , id_mesa as id FROM 
-        Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa limit 1");
+        Historico_Facturacion_Mesas WHERE cast(fecha_hora AS date) BETWEEN :fecha_inicio AND :fecha_fin GROUP BY id_mesa order by total_consumicion desc limit 1");
         $consulta->bindValue(':fecha_inicio', $fecha_inicio, PDO::PARAM_STR);
         $consulta->bindValue(':fecha_fin', $fecha_fin, PDO::PARAM_STR);
         $consulta->execute();

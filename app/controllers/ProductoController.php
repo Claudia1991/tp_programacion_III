@@ -50,7 +50,7 @@ class ProductoController extends Producto implements IApiUsable
 
   public function DescargaCsv($request,$response, $args)
   {
-    //TODO: funciona ok, verificar la descarga.
+    //La descarga funciona en el navegador
       $fechaActual = new DateTime();
       $marcaTemporal = $fechaActual->getTimestamp();
       $ruta_archivo_descargar = "./temporales/" . $marcaTemporal . "-productos.csv";
@@ -63,10 +63,11 @@ class ProductoController extends Producto implements IApiUsable
           fwrite($archivo_descargar, $linea . "\n");
         }
         fclose($archivo_descargar);
-        $payload = json_encode(array("mensaje" => "Archivo descargado en formato csv"));
-        $response->getBody()->write($payload);
+        ob_end_clean(); 
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="Productos.csv"');
         readfile($ruta_archivo_descargar);
-        return $response->withHeader('Content-Type', 'application/csv')->withStatus(200);
+        return $response->withHeader('Content-Type', 'text/csv');
       }else{
         $payload = json_encode(array("error" => "Ocurrio un error al descargar los productos en CSV"));
       }

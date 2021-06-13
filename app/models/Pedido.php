@@ -231,7 +231,7 @@ class Pedido
         $consulta->execute();
         $masvendido = $consulta->fetch();
         return 'Id producto: ' . $masvendido['id_producto'] . ' Nombre: ' . $masvendido['nombre'] . 
-        ' Cantidad Vendida: ' .$masvendido['cantidad_vendida'];
+        ' Cantidad: ' .$masvendido['cantidad_vendida'];
     }
     
     public static function menosVendido($fecha_inicio, $fecha_fin)
@@ -247,7 +247,7 @@ class Pedido
         $consulta->execute();
         $masvendido = $consulta->fetch();
         return 'Id producto: ' . $masvendido['id_producto'] . ' Nombre: ' . $masvendido['nombre'] . 
-        ' Cantidad Vendida: ' .$masvendido['cantidad_vendida'];
+        ' Cantidad: ' .$masvendido['cantidad_vendida'];
     }
 
     public static function entregadosFueraTiempo($fecha_inicio, $fecha_fin)

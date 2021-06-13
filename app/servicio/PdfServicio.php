@@ -5,7 +5,7 @@ use Fpdf\Fpdf;
 class PdfServicio extends Fpdf{
     function Header()
     {
-        $this->SetFont('Arial','B',15);
+        $this->SetFont('Arial','B',10);
         // Calculate width of title and position
         $w = $this->GetStringWidth("Reportes")+6;
         $this->SetX((210-$w)/2);
@@ -24,11 +24,11 @@ class PdfServicio extends Fpdf{
         // Position at 1.5 cm from bottom
         $this->SetY(-15);
         // Arial italic 8
-        $this->SetFont('Arial','I',8);
+        $this->SetFont('Arial','I',10);
         // Text color in gray
         $this->SetTextColor(128);
         // Page number
-        $this->Cell(0,10,'Claudia Jara',0,0,'C');
+        $this->Cell(0,10,'Claudia Jara - 2021',0,0,'C');
     }
 }
 
